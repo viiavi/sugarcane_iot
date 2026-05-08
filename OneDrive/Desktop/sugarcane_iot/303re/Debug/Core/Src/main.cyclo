@@ -1,0 +1,10 @@
+../Core/Src/main.c:77:5:main	2
+../Core/Src/main.c:128:17:Read_ADC3_WaterSensor	1
+../Core/Src/main.c:137:17:Read_ADC2_WaterSensor	1
+../Core/Src/main.c:149:6:SystemClock_Config	4
+../Core/Src/main.c:200:13:MX_ADC2_Init	3
+../Core/Src/main.c:257:13:MX_ADC3_Init	4
+../Core/Src/main.c:323:13:MX_USART1_UART_Init	2
+../Core/Src/main.c:358:13:MX_USART2_UART_Init	2
+../Core/Src/main.c:393:13:MX_GPIO_Init	1
+../Core/Src/main.c:435:6:Error_Handler	1
