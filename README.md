@@ -19,14 +19,14 @@
 
 This repository contains the complete firmware and documentation for the entire hardware stack, encompassing **STM32 microcontrollers** for low-level sensor integration/actuation and **NodeMCU (ESP8266/ESP32)** for lightweight telemetry and cloud bridging.
 
-### 🌟 The Novelty: Decentralized Consensus vs. Traditional IoT
+###  The Novelty: Decentralized Consensus vs. Traditional IoT
 
 **Why is this different from existing IoT projects?**
 Most traditional IoT irrigation systems rely on a **Centralized Cloud Architecture**: sensors blindly stream data to a cloud server (or a central gateway), and the server runs the logic to send back an "open valve" command. 
 * **The Problem:** If the internet connection drops, or the central gateway fails, the crops die.
 * **The Sugarcane IoT Solution:** We push the intelligence to the edge. The STM32 microcontrollers run a **Peer-to-Peer Consensus Protocol**. They don't just collect data; they cross-validate environmental states and actively negotiate the irrigation plan directly over a local hardware mesh. The Wi-Fi bridge (NodeMCU) is strictly used for *observability* (telemetry forwarding), not control. If the Wi-Fi drops, the local STM32 mesh seamlessly degrades to an autonomous consensus mode, continuing to water the sugarcane precisely without skipping a beat.
 
-### ✨ Key Features
+###  Key Features
 
 - **Decentralized Decision Making:** STM32 nodes share state and execute a unified state machine for irrigation, ensuring reliability even if the main gateway drops.
 - **Heterogeneous Hardware Mesh:** Seamless interoperability between high-performance ARM Cortex-M4/M4F processors (STM32F401RE/STM32F303RE) and low-cost Wi-Fi SoCs (NodeMCU).
