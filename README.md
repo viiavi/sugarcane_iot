@@ -1,3 +1,5 @@
+![iot Banner](results/banner4.jpeg)
+
 <div align="center">
   <h1> Sugarcane IoT: Decentralized Irrigation Consensus</h1>
   <p>
