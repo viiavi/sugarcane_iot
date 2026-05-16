@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🌱 Sugarcane IoT: Decentralized Irrigation Consensus</h1>
+  <h1> Sugarcane IoT: Decentralized Irrigation Consensus</h1>
   <p>
     <strong>A Robust, Peer-to-Peer IoT Irrigation System Built on Heterogeneous Hardware (STM32 & ESP8266)</strong>
   </p>
@@ -13,13 +13,13 @@
 
 ---
 
-## 📖 Overview
+##  Overview
 
 **Sugarcane IoT** is an advanced, decentralized irrigation system built to operate reliably in agricultural environments without relying on centralized cloud-control loops. By leveraging peer-to-peer consensus across edge nodes, the system ensures consistent and fault-tolerant irrigation logic.
 
 This repository contains the complete firmware and documentation for the entire hardware stack, encompassing **STM32 microcontrollers** for low-level sensor integration/actuation and **NodeMCU (ESP8266/ESP32)** for lightweight telemetry and cloud bridging.
 
-### ✨ Key Features
+###  Key Features
 
 - **Decentralized Decision Making:** STM32 nodes share state and execute a unified state machine for irrigation, ensuring reliability even if the main gateway drops.
 - **Heterogeneous Hardware Mesh:** Seamless interoperability between high-performance ARM Cortex-M4/M4F processors (STM32F401RE/STM32F303RE) and low-cost Wi-Fi SoCs (NodeMCU).
@@ -28,7 +28,7 @@ This repository contains the complete firmware and documentation for the entire 
 
 ---
 
-## 📂 Repository Structure
+##  Repository Structure
 
 The codebase is organized by hardware node and functional domain:
 
@@ -47,7 +47,7 @@ sugarcane_iot/
 
 ---
 
-## 🛠️ Hardware Stack
+##  Hardware Stack
 
 | Node Type | Microcontroller | Primary Responsibilities |
 | :--- | :--- | :--- |
@@ -57,7 +57,7 @@ sugarcane_iot/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -86,7 +86,7 @@ sugarcane_iot/
 
 ---
 
-## 📊 Results & Telemetry
+##  Results & Telemetry
 
 Test logs, performance evaluations, and graphical representations of the consensus protocol in action can be found in the [`results/`](./results) directory. We actively monitor:
 - Packet drop rates across the UART mesh.
@@ -95,7 +95,7 @@ Test logs, performance evaluations, and graphical representations of the consens
 
 ---
 
-## 📐 Architecture
+##  Architecture
 
 Curious about how the decentralized consensus works under the hood? 
 Check out the detailed **[System Architecture Documentation](./docs/architecture/system_architecture.md)**.
