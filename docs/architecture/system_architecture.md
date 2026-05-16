@@ -52,9 +52,11 @@ graph TD
 
 ---
 
-## ⚙️ The Consensus Protocol
+## ⚙️ The Novelty: Decentralized Consensus Protocol
 
-Because agricultural fields are subject to harsh conditions (rodents cutting wires, power dips, sensor degradation), the system utilizes a **Decentralized Irrigation Consensus**.
+Unlike traditional IoT systems where a cloud server dictates when to open a water valve, **Sugarcane IoT** utilizes a **Decentralized Irrigation Consensus**. Because agricultural fields are subject to harsh conditions (rodents cutting wires, power dips, sensor degradation, lost Wi-Fi), relying on a central server is a critical point of failure.
+
+In our protocol:
 
 1. **State Broadcasting:** Nodes continuously broadcast their local state matrix (containing their sensor readings and proposed actuator state).
 2. **Validation:** Before `Node B` activates a relay, it cross-references its own logical state with the state broadcasted by `Node A`. 

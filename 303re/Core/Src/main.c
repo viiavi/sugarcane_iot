@@ -260,10 +260,11 @@ static uint8_t Consensus_ParsePeerState(const char *line, NodeState_t *out)
     if (!p) return 0u;
     out->seq = (uint32_t)atol(p + 5);
 
-    /* TS */
-    p = strstr(line, "|TS=");
-    if (!p) return 0u;
-    out->ts = (uint32_t)atol(p + 4);
+    /* TS – use LOCAL receive time, not sender's clock.
+     * Sender's HAL_GetTick() is on a different epoch; comparing it to
+     * our own HAL_GetTick() would cause uint32 wrap and the peer would
+     * always appear stale.                                            */
+    out->ts = HAL_GetTick();
 
     strncpy(out->nodeId, PEER_ID, sizeof(out->nodeId) - 1);
     out->valid = 1u;
@@ -378,23 +379,29 @@ int main(void)
             ConsensusAction_t next = Consensus_Evaluate(&reason);
 
             /* Time-gate WAIT and SLEEP to avoid relay chatter */
-            if (next == ACT_WAIT) {
-                uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= WAIT_WINDOW_MS);
-                if (!windowElapsed) {
-                    Consensus_Apply(ACT_WAIT, "ONE_NEEDS_WAITING_WINDOW");
-                } else {
-                    Consensus_Apply(next, reason);
-                }
-            } else if (next == ACT_SLEEP) {
-                uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= SLEEP_WINDOW_MS);
-                if (!windowElapsed) {
-                    Consensus_Apply(ACT_SLEEP, "NONE_NEED_SLEEP_WINDOW");
-                } else {
-                    Consensus_Apply(next, reason);
-                }
-            } else {
-                /* IRRIGATE – apply immediately */
+            if (next == ACT_IRRIGATE) {
+                /* IRRIGATE – no window, actuate immediately */
                 Consensus_Apply(next, reason);
+
+            } else if (next == ACT_WAIT) {
+                /* Time-gate only applies to genuine ONE_NEEDS;
+                 * pass PEER_STALE_FALLBACK and others straight through. */
+                if (strcmp(reason, "ONE_NEEDS") == 0) {
+                    uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= WAIT_WINDOW_MS);
+                    Consensus_Apply(ACT_WAIT,
+                                    windowElapsed ? reason : "ONE_NEEDS_WAITING_WINDOW");
+                } else {
+                    Consensus_Apply(next, reason);
+                }
+
+            } else { /* ACT_SLEEP */
+                if (strcmp(reason, "NONE_NEED") == 0) {
+                    uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= SLEEP_WINDOW_MS);
+                    Consensus_Apply(ACT_SLEEP,
+                                    windowElapsed ? reason : "NONE_NEED_SLEEP_WINDOW");
+                } else {
+                    Consensus_Apply(next, reason);
+                }
             }
         }
     }

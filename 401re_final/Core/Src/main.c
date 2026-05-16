@@ -248,9 +248,11 @@ static uint8_t Consensus_ParsePeerState(const char *line, NodeState_t *out)
     if (!p) return 0u;
     out->seq = (uint32_t)atol(p + 5);
 
-    p = strstr(line, "|TS=");
-    if (!p) return 0u;
-    out->ts = (uint32_t)atol(p + 4);
+    /* TS – use LOCAL receive time, not sender's clock.
+     * Sender's HAL_GetTick() is on a different epoch; comparing it to
+     * our own HAL_GetTick() would cause uint32 wrap and the peer would
+     * always appear stale.                                            */
+    out->ts = HAL_GetTick();
 
     strncpy(out->nodeId, PEER_ID, sizeof(out->nodeId) - 1);
     out->valid = 1u;
@@ -284,7 +286,13 @@ static ConsensusAction_t Consensus_Evaluate(const char **reasonOut)
 }
 
 /* =========================================================================
- * Publish CONSENSUS decision over both UARTs
+ * Publish CONSENSUS decision
+ *
+ * IMPORTANT: CONSENSUS packets go to the debug terminal (huart2) ONLY.
+ * They must NOT be sent on huart1 (the NodeMCU relay link) because
+ * SoftwareSerial's 64-byte buffer overflows when STATE + CONSENSUS
+ * arrive back-to-back at 115200 baud, causing line merging and the
+ * relay dropping all subsequent STATE packets.
  * ========================================================================= */
 static void Consensus_PublishDecision(ConsensusAction_t act, const char *reason)
 {
@@ -297,8 +305,8 @@ static void Consensus_PublishDecision(ConsensusAction_t act, const char *reason)
              (unsigned long)g_localSeq,
              (unsigned long)HAL_GetTick());
 
-    HAL_UART_Transmit(&huart1, (uint8_t *)buf, (uint16_t)strlen(buf), 300);
-    DBG(buf);
+    /* huart1 → NodeMCU relay link: STATE only, never CONSENSUS */
+    DBG(buf);   /* huart2 → debug terminal only */
 }
 
 /* =========================================================================
@@ -362,22 +370,29 @@ int main(void)
             const char *reason = "UNKNOWN";
             ConsensusAction_t next = Consensus_Evaluate(&reason);
 
-            if (next == ACT_WAIT) {
-                uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= WAIT_WINDOW_MS);
-                if (!windowElapsed) {
-                    Consensus_Apply(ACT_WAIT, "ONE_NEEDS_WAITING_WINDOW");
-                } else {
-                    Consensus_Apply(next, reason);
-                }
-            } else if (next == ACT_SLEEP) {
-                uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= SLEEP_WINDOW_MS);
-                if (!windowElapsed) {
-                    Consensus_Apply(ACT_SLEEP, "NONE_NEED_SLEEP_WINDOW");
-                } else {
-                    Consensus_Apply(next, reason);
-                }
-            } else {
+            if (next == ACT_IRRIGATE) {
+                /* IRRIGATE – no window, actuate immediately */
                 Consensus_Apply(next, reason);
+
+            } else if (next == ACT_WAIT) {
+                /* Time-gate only applies to genuine ONE_NEEDS;
+                 * pass PEER_STALE_FALLBACK and others straight through. */
+                if (strcmp(reason, "ONE_NEEDS") == 0) {
+                    uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= WAIT_WINDOW_MS);
+                    Consensus_Apply(ACT_WAIT,
+                                    windowElapsed ? reason : "ONE_NEEDS_WAITING_WINDOW");
+                } else {
+                    Consensus_Apply(next, reason);
+                }
+
+            } else { /* ACT_SLEEP */
+                if (strcmp(reason, "NONE_NEED") == 0) {
+                    uint8_t windowElapsed = ((HAL_GetTick() - g_actionSinceMs) >= SLEEP_WINDOW_MS);
+                    Consensus_Apply(ACT_SLEEP,
+                                    windowElapsed ? reason : "NONE_NEED_SLEEP_WINDOW");
+                } else {
+                    Consensus_Apply(next, reason);
+                }
             }
         }
     }
