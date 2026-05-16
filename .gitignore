@@ -1,0 +1,26 @@
+# Ignore all files by default
+/*
+
+# Except these explicitly tracked files and directories
+!.gitignore
+!303re/
+!401re_final/
+!NodeMCU/
+!README.md
+!docs/
+!results/
+
+# Ignore standard IDE / compilation files inside tracked directories
+.project
+.cproject
+.mxproject
+.vscode/
+.pio/
+Debug/
+Release/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.zip
