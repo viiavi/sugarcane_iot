@@ -253,8 +253,9 @@ static void handleLine(const String &line)
             Serial.println(line);
 
         } else if (line.indexOf("NODE=F303") > 0) {
-            StateToJson(line, g_f303);   /* observation only */
-            Serial.print("[OBS F303] ");
+            String json = StateToJson(line, g_f303);
+            MQTT_Publish("sugarcane/state/F303", json);
+            Serial.print("[MQTT F303] ");
             Serial.println(line);
         }
         return;

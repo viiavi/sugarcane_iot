@@ -95,6 +95,12 @@ sugarcane_iot/
 
 ##  Results & Telemetry
 
+The real-time observability dashboard provides a live look at the decentralized consensus engine in action, alongside comparative analysis of prototype hardware versus ideal agricultural thresholds.
+
+<div align="center">
+  <img src="./results/dashboard.png" alt="Real-time Sugarcane IoT Dashboard" width="800">
+</div>
+
 Test logs, performance evaluations, and graphical representations of the consensus protocol in action can be found in the [`results/`](./results) directory. We actively monitor:
 - Packet drop rates across the UART mesh.
 - State-convergence latency between the STM32 nodes.

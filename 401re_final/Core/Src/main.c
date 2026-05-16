@@ -287,12 +287,6 @@ static ConsensusAction_t Consensus_Evaluate(const char **reasonOut)
 
 /* =========================================================================
  * Publish CONSENSUS decision
- *
- * IMPORTANT: CONSENSUS packets go to the debug terminal (huart2) ONLY.
- * They must NOT be sent on huart1 (the NodeMCU relay link) because
- * SoftwareSerial's 64-byte buffer overflows when STATE + CONSENSUS
- * arrive back-to-back at 115200 baud, causing line merging and the
- * relay dropping all subsequent STATE packets.
  * ========================================================================= */
 static void Consensus_PublishDecision(ConsensusAction_t act, const char *reason)
 {
@@ -305,8 +299,12 @@ static void Consensus_PublishDecision(ConsensusAction_t act, const char *reason)
              (unsigned long)g_localSeq,
              (unsigned long)HAL_GetTick());
 
-    /* huart1 → NodeMCU relay link: STATE only, never CONSENSUS */
-    DBG(buf);   /* huart2 → debug terminal only */
+    /* Wait 100ms before sending to NodeMCU.
+     * Since STATE and CONSENSUS are generated back-to-back,
+     * this prevents the NodeMCU's SoftwareSerial buffer from overflowing. */
+    HAL_Delay(100);
+    HAL_UART_Transmit(&huart1, (uint8_t *)buf, (uint16_t)strlen(buf), 300);
+    DBG(buf);   /* huart2 → debug terminal */
 }
 
 /* =========================================================================
@@ -356,6 +354,11 @@ int main(void)
                 DBG("[PEER] ");
                 DBG(lineBuf);
                 DBG("\r\n");
+
+                /* Forward the peer (F303) packet to NodeMCU so it reaches the cloud */
+                char fwd[128];
+                snprintf(fwd, sizeof(fwd), "%s\r\n", lineBuf);
+                HAL_UART_Transmit(&huart1, (uint8_t *)fwd, (uint16_t)strlen(fwd), 100);
             }
         }
 
